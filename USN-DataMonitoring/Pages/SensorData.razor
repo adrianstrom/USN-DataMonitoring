@@ -1,0 +1,38 @@
+﻿@page "/measurementSites/{Id:int}"
+
+@using USN_DataMonitoring.Data
+@using USN_Persistence
+@inject MeasurementSitesService MeasurementSitesService
+
+@if (sensors.Count == 0)
+{
+    <p><em>This site has no sensors yet.</em></p>
+}
+else
+{
+    <div class="row">
+    @foreach (var sensor in sensors)
+    {
+        <div class="col-sm-6" style="margin-bottom:10px">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">@sensor.SensorName</h5>
+                <a href="tags/@sensor.SensorId" class="card-link">Display tags</a>
+              </div>               
+            </div>               
+        </div>  
+    }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private List<Sensor> sensors;
+
+    protected override async Task OnInitializedAsync()
+    {
+        sensors = MeasurementSitesService.GetSensors(Id);
+    }
+}

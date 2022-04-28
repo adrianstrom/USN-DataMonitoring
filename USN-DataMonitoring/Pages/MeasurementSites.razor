@@ -1,0 +1,50 @@
+﻿@page "/measurementSites"
+
+<PageTitle>Measurement sites</PageTitle>
+
+@using USN_DataMonitoring.Data
+@using USN_Persistence
+@inject MeasurementSitesService MeasurementSitesService
+
+<h1>Measurement sites</h1>
+
+<p>All active measurement sites.</p>
+<div>
+    <button type="button" style="float:right" class="btn btn-success">Create Measurement Site</button>
+</div>
+<br/>
+<br/>
+<br/>
+
+<div class="row">
+@if (sites.Count == 0)
+{
+    <p><em>No measurement sites exists.</em></p>
+}
+else
+{
+    @foreach (var site in sites)
+    {
+        <div class="col-sm-6" style="margin-bottom:10px">
+            <img class="card-img-top" src="https://dms-cf-07.dimu.org/image/03348SSDwHnu?dimension=1200x1200" alt="Card image cap">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">@site.SiteName</h5>
+                <p class="card-text">@site.Description</p>
+                <a href="measurementSites/@site.SiteId" class="btn btn-primary btn-md active" role="button" aria-pressed="true">Goto</a>
+                <button type="button" class="btn btn-danger">Delete</button>
+              </div>
+            </div>
+        </div>
+    }
+}
+</div>
+
+@code {
+    private List<Site> sites;
+
+    protected override async Task OnInitializedAsync()
+    {
+        sites = MeasurementSitesService.GetSites();
+    }
+}

@@ -1,0 +1,104 @@
+﻿@page "/tags/{SensorId:int}"
+
+@using ChartJs.Blazor.Common
+@using ChartJs.Blazor.Common.Axes
+@using ChartJs.Blazor.Common.Enums
+@using ChartJs.Blazor.Common.Time
+@using ChartJs.Blazor.LineChart
+@using ChartJs.Blazor.Util
+@using USN_Persistence
+@using USN_DataMonitoring.Data
+@using ChartJs.Blazor
+@inject MeasurementSitesService MeasurementSitesService
+
+@if (Tags.Count == 0)
+{
+    <p><em>This sensors has no tags yet.</em></p>
+}
+else
+{
+    @foreach (var tag in Tags)
+    {
+        <Chart Width=1200 Height=400 Config="_config" @ref="_chart"></Chart>
+    }
+}
+
+@code {
+    [Parameter]
+    public int SensorId { get; set; }
+
+    [Parameter]
+    public List<Tag> Tags { get; set; }
+
+    private LineConfig _config;
+    private Chart _chart;
+    private Tag? _tag;
+
+    protected override void OnInitialized()
+    {
+        _tag = MeasurementSitesService.GetTag(1);
+        _config = new LineConfig
+            {
+                Options = new LineOptions
+                {
+                    Responsive = true,
+                    Title = new OptionsTitle
+                    {
+                        Display = true,
+                        Text = "Temperature [celsius]"
+                    },
+                    Tooltips = new Tooltips
+                    {
+                        Mode = InteractionMode.Nearest,
+                        Intersect = true
+                    },
+                    Hover = new Hover
+                    {
+                        Mode = InteractionMode.Nearest,
+                        Intersect = true
+                    },
+                    Scales = new Scales
+                    {
+                    XAxes = new List<CartesianAxis>
+                    {
+                        new TimeAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Date"
+                            },
+                            Time = new TimeOptions
+                            {
+                                TooltipFormat = "ll HH:mm"
+                            },
+                        }
+                    },
+                        YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Value"
+                            }
+                        }
+                    }
+                    }
+                }
+            };
+        var measurementPoints = _tag.MeasuredValues.Select(x => new TimePoint(x.Timestamp.Value, x.Value.Value));
+        var dataset = new LineDataset<TimePoint>(measurementPoints)
+        {
+            BackgroundColor = "Blue",
+            BorderColor = "Green",
+            Fill = FillingMode.Disabled
+        };
+        _config.Data.Datasets.Add(dataset);
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        Tags = MeasurementSitesService.GetAllTags();
+        await base.OnParametersSetAsync();
+    }
+}

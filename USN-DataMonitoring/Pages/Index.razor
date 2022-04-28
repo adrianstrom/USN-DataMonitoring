@@ -1,0 +1,70 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+@using USN_Persistence
+@inject NavigationManager NavigationManager
+@implements IAsyncDisposable
+
+<PageTitle>Index</PageTitle>
+<hr>
+
+<ul id="messagesList">
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+@*<p>Last measured value: @lastMeasuredValue</p>*@
+
+@code {
+    private HubConnection? hubConnection;
+    private List<string> messages = new List<string>();
+    //private double lastMeasuredValue;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/taghub"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        // Call "Cancel" on this CancellationTokenSource to send a cancellation message to
+        // the server, which will trigger the corresponding token in the hub method.
+        var cancellationTokenSource = new CancellationTokenSource();
+        var stream = hubConnection.StreamAsync<double>(
+            "Counter", 10, 500, cancellationTokenSource.Token);
+
+        await foreach (var count in stream)
+        {
+            //lastMeasuredValue = count;
+        }
+
+        Console.WriteLine("Streaming completed");
+
+
+
+        //hubConnection.ServerTimeout = new TimeSpan(1, 0, 0);
+
+        //var cancellationTokenSource = new CancellationTokenSource();
+        //var stream = await hubConnection.StreamAsChannelAsync<MeasuredValue>(
+        //    "Counter", 1, 500, cancellationTokenSource.Token);
+
+        //// Wait asynchronously for data to become available
+        //while (await stream.WaitToReadAsync())
+        //{
+        //    // Read all currently available data synchronously, before waiting for more data
+        //    while (stream.TryRead(out var count))
+        //    {
+        //        lastMeasuredValue = count;
+        //    }
+        // }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}
