@@ -11,11 +11,13 @@
         public bool Manual { get; set; }
 
         public double SetPoint { get; set; }
-        public double MeasuredValue { get; set; }
+        public double ProcessVariable { get; set; } // This should be temperature for the Air Heater. Continously update this value from sensor.
 
         public double ControlSignal { get; set; }
 
-        public double Error => SetPoint - MeasuredValue;
+        public double Error => SetPoint - ProcessVariable;
+
+        private double _lastState;
 
         public PIDController(double Kp, double Ti = default, double Td = default)
         {
@@ -30,11 +32,12 @@
             {
                 return ControlSignal;
             }
-            var lastprocessvalue = 0;
             var u_p = Kp * Error;
-            var u_i = lastprocessvalue + (Kp / Ti) * TimeStep * Error;
-            // TODO: u_d (deriviate term)
-            return u_p + u_i;
+            var u_i = _lastState + (Kp / Ti) * TimeStep * Error;
+            var u_d = 0;
+            var u_tot = u_p + u_i + u_d;
+            _lastState = u_tot;
+            return u_tot;
         }
     }
 }
