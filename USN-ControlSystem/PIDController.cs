@@ -2,15 +2,22 @@
 {
     public class PIDController
     {
-        private double _kp;
-        private double _ti;
-        private double _td;
+        public double Kp { get; set; }
+        public double Ti { get; set; }
+        public double Td { get; set; }
+
+        public bool Manual { get; set; }
+
+        public double SetPoint { get; set; }
+        public double MeasuredValue { get; set; }
+
+        public double Error => SetPoint - MeasuredValue;
 
         public PIDController(double Kp, double Ti, double Td)
         {
-            _kp = Kp;
-            _ti = Ti;
-            _td = Td;
+            this.Kp = Kp;
+            this.Ti = Ti;
+            this.Td = Td;
         }
     }
 }
