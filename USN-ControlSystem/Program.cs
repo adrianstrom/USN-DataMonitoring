@@ -12,6 +12,9 @@ namespace USN_ControlSystem
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new Form1());
+
+            var pidController = new PIDController(20);
+            pidController.SetPoint = 10;
         }
     }
 }

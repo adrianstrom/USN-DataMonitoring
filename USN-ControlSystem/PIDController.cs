@@ -13,7 +13,7 @@
 
         public double Error => SetPoint - MeasuredValue;
 
-        public PIDController(double Kp, double Ti, double Td)
+        public PIDController(double Kp, double Ti = default, double Td = default)
         {
             this.Kp = Kp;
             this.Ti = Ti;
